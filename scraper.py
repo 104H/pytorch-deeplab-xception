@@ -3,7 +3,7 @@
          A scraper I made to pull Naeem's results from separate files and prepare a csv
 '''
 
-import os, json, re, sys
+import os, re, sys
 
 data = {}
 
@@ -31,6 +31,11 @@ data['Crops_as_Weeds'] = []
 data['Soil_as_Soil'] = []
 data['Soil_as_Crop'] = []
 data['Soil_as_Weeds'] = []
+
+'''
+data['synthetic_size'] = []
+data['real_size'] = []
+'''
 
 def appendNoneConfusion():
     data['Weeds_as_Soil'].append(None)
@@ -115,6 +120,14 @@ for root, dirs, files in os.walk("/home/robot/hunaid/pytorch-deeplab-xception/ru
                     _ = re.findall("Found (\d+) test images", b)
                     data['test_size'].append( _[0] if len(_) > 0 else None )
 
+                    '''
+                    _ = re.findall("Found (\d+) synthetic images", b)
+                    data['synthetic_size'].append( _[0] if len(_) > 0 else None )
+
+                    _ = re.findall("Found (\d+) real images", b)
+                    data['real_size'].append( _[0] if len(_) > 0 else None )
+                    '''
+
                 except Exception as e:
                     print(str(e))
 
@@ -122,6 +135,9 @@ for root, dirs, files in os.walk("/home/robot/hunaid/pytorch-deeplab-xception/ru
 
 import pandas as pd
 df = pd.DataFrame.from_dict(data)
+
+#df['synthetic_percentage'] = df.synthetic_size.astype(int) / ( df.real_size.astype(int) + df.synthetic_size.astype(int) )
+
 df = df[ ["foldername", "checkpoint", "best_pred", "accuracy", "accuracy_class", "accuracy_pixel", "mIoU", "fwIoU", "train_size", "val_size", "test_size", "datset", "epoch", 'Weeds_as_Soil', 'Weeds_as_Crop', 'Weeds_as_Weeds', 'Crops_as_Soil', 'Crops_as_Crop', 'Crops_as_Weeds', 'Soil_as_Soil', 'Soil_as_Crop', 'Soil_as_Weeds'] ]
 df.to_csv("trainingresults.csv")
 
